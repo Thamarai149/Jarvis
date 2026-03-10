@@ -15,7 +15,7 @@ from livekit.plugins import (
     noise_cancellation,
 )
 
-from prompt import AGENT_INSTRUCTION
+from prompt import AGENT_INSTRUCTION, AGENT_RESPONSE
 
 load_dotenv(".env")
 
@@ -30,7 +30,8 @@ async def entrypoint(ctx: JobContext):
 
     # Wait for the first participant to join
     participant = await ctx.wait_for_participant()
-    logger.info(f"starting agent for participant {participant.identity}")
+    
+    logger.info("Starting voice assistant agent")
 
     agent = llm.LLMAgent(
         model=google.realtime.RealtimeModel(

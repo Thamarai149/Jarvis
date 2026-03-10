@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -61,8 +60,6 @@ fun ControlBar(
     onCameraClick: () -> Unit,
     isScreenShareEnabled: Boolean,
     onScreenShareClick: () -> Unit,
-    isChatEnabled: Boolean,
-    onChatClick: () -> Unit,
     onExitClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -141,17 +138,6 @@ fun ControlBar(
         Spacer(Modifier.size(8.dp))
 
         IconButton(
-            onClick = onChatClick,
-            modifier = buttonModifier
-                .weight(1f)
-                .enabledButtonModifier(isChatEnabled)
-        ) {
-            Icon(Icons.AutoMirrored.Filled.Chat, "Toggle Chat")
-        }
-
-        Spacer(Modifier.size(8.dp))
-
-        IconButton(
             onClick = onExitClick,
             modifier = buttonModifier.weight(1f)
         ) {
@@ -171,8 +157,6 @@ fun ControlBarPreview() {
         onCameraClick = {},
         isScreenShareEnabled = false,
         onScreenShareClick = { },
-        isChatEnabled = false,
-        onChatClick = {},
         onExitClick = {},
         modifier = Modifier
             .fillMaxWidth()

@@ -15,6 +15,8 @@ materialIconsExtended = "1.7.8"
 okhttp = "5.2.1"
 timberkt = "1.5.1"
 navigationCompose = "2.9.5"
+room = "2.6.1"
+datastore = "1.1.3"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -40,6 +42,10 @@ livekit-components = { group = "io.livekit", name = "livekit-android-compose-com
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 timberkt = { module = "com.github.ajalt:timberkt", version.ref = "timberkt" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

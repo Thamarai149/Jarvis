@@ -1,0 +1,92 @@
+# Environment variables - DO NOT COMMIT
+.env
+.env.local
+.env.*.local
+
+# API Keys and Secrets
+jarvis.txt
+sandbox.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.ap_
+*.aab
+
+# Android Studio
+*.iml
+.idea/
+.gradle/
+local.properties
+*.log
+
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local configuration files
+*.properties
+
+# Logs
+*.log
+logs/
+conversation_logs/
+
+# User data
+user_context.json
+scheduled_tasks.json
+config.json
+jarvis_prefs.xml
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Documentation (optional - remove if you want to commit docs)
+NEW_FEATURES.md
+PERFORMANCE_OPTIMIZATION.md
+ERROR_FIXES.md
+SPLASH_SCREEN_INFO.md
+TEXT_CHAT_GUIDE.md
+ANDROID_PYTHON_SETUP.md
+DIRECT_AGENT_SETUP.md
+PERMISSION_FIX.md
+AUTO_START_SETUP.md
+
+# Backup files
+*.bak
+*.backup
