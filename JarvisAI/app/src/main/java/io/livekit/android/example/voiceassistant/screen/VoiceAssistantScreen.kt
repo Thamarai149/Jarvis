@@ -57,6 +57,7 @@ import io.livekit.android.compose.state.rememberSession
 import io.livekit.android.compose.state.rememberSessionMessages
 import io.livekit.android.compose.ui.VideoTrackView
 import io.livekit.android.example.voiceassistant.data.SettingsManager
+import io.livekit.android.compose.state.rememberConnectionState
 import io.livekit.android.example.voiceassistant.rememberCanEnableCamera
 import io.livekit.android.example.voiceassistant.rememberCanEnableMic
 import io.livekit.android.example.voiceassistant.requirePermissions
@@ -66,10 +67,11 @@ import io.livekit.android.example.voiceassistant.ui.ChatLog
 import io.livekit.android.example.voiceassistant.ui.ControlBar
 import io.livekit.android.example.voiceassistant.ui.QuickActions
 import io.livekit.android.example.voiceassistant.viewmodel.VoiceAssistantViewModel
+import io.livekit.android.events.RoomEvent
 import io.livekit.android.room.Room
 import io.livekit.android.room.track.screencapture.ScreenCaptureParams
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -115,7 +117,8 @@ fun VoiceAssistant(
     )
     
     val room = requireRoom()
-    val isConnected by room.state.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
+    val connectionState = rememberConnectionState()
+    val isConnected = connectionState == Room.State.CONNECTED
 
     val context = LocalContext.current
     val settingsManager = remember { SettingsManager(context) }

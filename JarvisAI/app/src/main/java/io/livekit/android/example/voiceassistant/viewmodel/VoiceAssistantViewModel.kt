@@ -16,8 +16,7 @@ import io.livekit.android.room.participant.Participant
 import androidx.lifecycle.viewModelScope
 import io.livekit.android.events.RoomEvent
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import java.util.UUID
 
 /**
@@ -53,7 +52,7 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
                 if (event is RoomEvent.ParticipantMetadataChanged) {
                     val participant = event.participant
                     repository.saveMessage(
-                        sender = if (participant != null && participant.identity?.value != room.localParticipant.identity?.value) "agent" else "user",
+                        sender = if (participant != null && participant.identity != room.localParticipant.identity) "agent" else "user",
                         content = participant.metadata ?: "",
                         sessionId = sessionId
                     )
