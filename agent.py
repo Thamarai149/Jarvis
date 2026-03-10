@@ -1,54 +1,46 @@
 from dotenv import load_dotenv
-import logging
-import asyncio
 
-from livekit import agents, rtc
-from livekit.agents import (
-    AutoSubscribe,
-    JobContext,
-    JobRequest,
-    WorkerOptions,
-    llm,
-)
-from livekit.plugins import (
+from livekit import agents
+from livekit.agents import AgentSession, Agent, RoomInputOptions
+from livekit.plugins import(
     google,
     noise_cancellation,
 )
 
 from prompt import AGENT_INSTRUCTION, AGENT_RESPONSE
 
-load_dotenv(".env")
+load_dotenv()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-async def entrypoint(ctx: JobContext):
-    logger.info(f"starting entrypoint for room {ctx.room.name}")
+class Assistant(Agent):
+    def __init__(self) -> None:
+        super().__init__(
+            instructions=AGENT_INSTRUCTION
+        )
 
-    await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
-
-    # Wait for the first participant to join
-    participant = await ctx.wait_for_participant()
-    
-    logger.info("Starting voice assistant agent")
-
-    agent = llm.LLMAgent(
-        model=google.realtime.RealtimeModel(
+async def entrypoint(ctx: agents.JobContext):
+    session = AgentSession(
+        llm=google.realtime.RealtimeModel(
             voice="Puck",
             temperature=0.8,
             instructions=AGENT_INSTRUCTION,
+        )
+    )
+
+    await session.start(
+        room=ctx.room,
+        agent=Assistant(),
+        room_input_options=RoomInputOptions(
+            noise_cancellation=noise_cancellation.BVC(),
         ),
     )
 
-    agent.start(ctx.room, participant)
+    await ctx.connect()
 
-    # Maintain the session
-    await asyncio.sleep(float('inf'))
+    await session.generate_reply(
+        instructions=AGENT_RESPONSE
+    )
+
 
 if __name__ == "__main__":
-    agents.cli.run_app(
-        WorkerOptions(
-            entrypoint_fnc=entrypoint,
-        )
-    )
+    agents.cli.run_app(agents.WorkerOptions( entrypoint_fnc=entrypoint))
