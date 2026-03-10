@@ -10,12 +10,10 @@ import io.livekit.android.token.TokenSource
 import io.livekit.android.token.cached
 import io.livekit.android.example.voiceassistant.data.ChatHistoryRepository
 import io.livekit.android.example.voiceassistant.data.JarvisDatabase
-import io.livekit.android.room.Room
 import androidx.lifecycle.viewModelScope
 import io.livekit.android.events.RoomEvent
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
@@ -47,7 +45,7 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
 
     private fun setupMessageListener() {
         room.events
-            .onEach { event ->
+            .onEach { event: RoomEvent ->
                 if (event is RoomEvent.ParticipantMetadataChanged) {
                     val participant = event.participant
                     repository.saveMessage(
