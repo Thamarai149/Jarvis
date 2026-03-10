@@ -15,7 +15,7 @@ from livekit.plugins import (
     noise_cancellation,
 )
 
-from prompt import AGENT_INSTRUCTION, PERSONALITIES, AGENT_RESPONSE
+from prompt import AGENT_INSTRUCTION, AGENT_RESPONSE
 
 load_dotenv(".env")
 
@@ -30,26 +30,16 @@ async def entrypoint(ctx: JobContext):
 
     # Wait for the first participant to join
     participant = await ctx.wait_for_participant()
-    # Get personality from participant metadata
-    personality_type = participant.metadata or "Default"
-    instructions = PERSONALITIES.get(personality_type, AGENT_INSTRUCTION)
     
-    logger.info(f"Setting agent personality to: {personality_type}")
+    logger.info("Starting voice assistant agent")
 
     agent = llm.LLMAgent(
         model=google.realtime.RealtimeModel(
             voice="Puck",
             temperature=0.8,
-            instructions=instructions,
+            instructions=AGENT_INSTRUCTION,
         ),
     )
-
-    @ctx.room.on("data_received")
-    def on_data_received(data: rtc.DataPacket):
-        if data.topic == "file-upload":
-            logger.info(f"Received file data: {len(data.data)} bytes")
-            # In a real app, we would process or save this file.
-            # For now, we'll just log it.
 
     agent.start(ctx.room, participant)
 
