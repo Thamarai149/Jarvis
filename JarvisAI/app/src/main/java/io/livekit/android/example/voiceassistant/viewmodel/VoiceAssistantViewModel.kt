@@ -13,10 +13,8 @@ import io.livekit.android.example.voiceassistant.data.JarvisDatabase
 import io.livekit.android.room.Room
 import io.livekit.android.room.track.Track
 import io.livekit.android.room.participant.Participant
-import io.livekit.android.room.房间
 import androidx.lifecycle.viewModelScope
 import io.livekit.android.events.RoomEvent
-import io.livekit.android.events.collect
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -27,8 +25,6 @@ import java.util.UUID
 class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
 
     val room = LiveKit.create(application)
-
-    val tokenSource: TokenSource
 
     val tokenSource: TokenSource
     private val repository: ChatHistoryRepository
@@ -52,12 +48,11 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
     private fun setupMessageListener() {
         viewModelScope.launch {
             room.events.collect { event ->
-                if (event is RoomEvent.ChatMessageReceived) {
+                if (event is RoomEvent.ParticipantMetadataChanged) {
                     val participant = event.participant
-                    val message = event.message
                     repository.saveMessage(
-                        sender = if (participant != null) "agent" else "user",
-                        content = message.message ?: "",
+                        sender = if (participant != null && participant.identity?.value != room.localParticipant.identity?.value) "agent" else "user",
+                        content = participant.metadata ?: "",
                         sessionId = sessionId
                     )
                 }

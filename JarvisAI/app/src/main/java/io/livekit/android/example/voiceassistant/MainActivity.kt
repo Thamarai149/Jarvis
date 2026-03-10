@@ -20,7 +20,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import io.livekit.android.example.voiceassistant.screen.*
 import io.livekit.android.example.voiceassistant.data.SettingsManager
@@ -38,6 +38,7 @@ import io.livekit.android.util.LoggingLevel
 
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

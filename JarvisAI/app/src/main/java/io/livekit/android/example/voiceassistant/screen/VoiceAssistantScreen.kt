@@ -21,9 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +56,7 @@ import io.livekit.android.compose.state.rememberLocalMedia
 import io.livekit.android.compose.state.rememberSession
 import io.livekit.android.compose.state.rememberSessionMessages
 import io.livekit.android.compose.ui.VideoTrackView
+import io.livekit.android.example.voiceassistant.data.SettingsManager
 import io.livekit.android.example.voiceassistant.rememberCanEnableCamera
 import io.livekit.android.example.voiceassistant.rememberCanEnableMic
 import io.livekit.android.example.voiceassistant.requirePermissions
@@ -63,10 +66,10 @@ import io.livekit.android.example.voiceassistant.ui.ChatLog
 import io.livekit.android.example.voiceassistant.ui.ControlBar
 import io.livekit.android.example.voiceassistant.ui.QuickActions
 import io.livekit.android.example.voiceassistant.viewmodel.VoiceAssistantViewModel
-import io.livekit.android.example.voiceassistant.data.SettingsManager
+import io.livekit.android.room.Room
 import io.livekit.android.room.track.screencapture.ScreenCaptureParams
-import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -112,7 +115,7 @@ fun VoiceAssistant(
     )
     
     val room = requireRoom()
-    val isConnected by room.stateFlow.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
+    val isConnected by room::state.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
 
     val context = LocalContext.current
     val settingsManager = remember { SettingsManager(context) }
@@ -132,7 +135,7 @@ fun VoiceAssistant(
             // Set personality in metadata for the agent to read
             val result = session.start()
             if (result.isSuccess) {
-                room.localParticipant.setMetadata(personality)
+                room.localParticipant.updateMetadata(personality)
             }
 
             // Handle if the session fails to connect.
