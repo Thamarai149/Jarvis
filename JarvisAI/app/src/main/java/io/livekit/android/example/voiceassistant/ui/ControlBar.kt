@@ -24,6 +24,12 @@ import androidx.compose.material.icons.outlined.PresentToAll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +70,8 @@ fun ControlBar(
     isChatEnabled: Boolean,
     onChatClick: () -> Unit,
     onExitClick: () -> Unit,
+    isPttMode: Boolean = false,
+    onPttPress: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -84,13 +92,27 @@ fun ControlBar(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clickable(onClick = onMicClick)
+                .then(
+                    if (isPttMode) {
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    onPttPress(true)
+                                    tryAwaitRelease()
+                                    onPttPress(false)
+                                }
+                            )
+                        }
+                    } else {
+                        Modifier.clickable(onClick = onMicClick)
+                    }
+                )
                 .height(48.dp)
                 .weight(1f)
                 .enabledButtonModifier(isMicEnabled)
         ) {
             Spacer(Modifier.size(8.dp))
-            Icon(micIcon, "Toggle Microphone")
+            Icon(micIcon, if (isPttMode) "PTT" else "Toggle Microphone")
             AnimatedVisibility(isMicEnabled) {
                 AudioBarVisualizer(
                     audioTrackRef = localAudioTrack,

@@ -8,6 +8,17 @@ import io.livekit.android.LiveKit
 import io.livekit.android.example.voiceassistant.screen.VoiceAssistantRoute
 import io.livekit.android.token.TokenSource
 import io.livekit.android.token.cached
+import io.livekit.android.example.voiceassistant.data.ChatHistoryRepository
+import io.livekit.android.example.voiceassistant.data.JarvisDatabase
+import io.livekit.android.room.Room
+import io.livekit.android.room.track.Track
+import io.livekit.android.room.participant.Participant
+import io.livekit.android.room.房间
+import androidx.lifecycle.viewModelScope
+import io.livekit.android.events.RoomEvent
+import io.livekit.android.events.collect
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * This ViewModel handles holding onto the Room object, so that it is
@@ -19,6 +30,10 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
 
     val tokenSource: TokenSource
 
+    val tokenSource: TokenSource
+    private val repository: ChatHistoryRepository
+    val sessionId = UUID.randomUUID().toString()
+
     init {
         val (sandboxId, url, token) = savedStateHandle.toRoute<VoiceAssistantRoute>()
 
@@ -26,6 +41,27 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
             TokenSource.fromSandboxTokenServer(sandboxId = sandboxId).cached()
         } else {
             TokenSource.fromLiteral(url, token).cached()
+        }
+
+        val database = JarvisDatabase.getDatabase(application)
+        repository = ChatHistoryRepository(database.chatHistoryDao())
+
+        setupMessageListener()
+    }
+
+    private fun setupMessageListener() {
+        viewModelScope.launch {
+            room.events.collect { event ->
+                if (event is RoomEvent.ChatMessageReceived) {
+                    val participant = event.participant
+                    val message = event.message
+                    repository.saveMessage(
+                        sender = if (participant != null) "agent" else "user",
+                        content = message.message ?: "",
+                        sessionId = sessionId
+                    )
+                }
+            }
         }
     }
 

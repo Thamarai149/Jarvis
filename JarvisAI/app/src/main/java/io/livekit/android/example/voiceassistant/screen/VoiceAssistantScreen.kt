@@ -61,8 +61,11 @@ import io.livekit.android.example.voiceassistant.ui.AgentVisualization
 import io.livekit.android.example.voiceassistant.ui.ChatBar
 import io.livekit.android.example.voiceassistant.ui.ChatLog
 import io.livekit.android.example.voiceassistant.ui.ControlBar
+import io.livekit.android.example.voiceassistant.ui.QuickActions
 import io.livekit.android.example.voiceassistant.viewmodel.VoiceAssistantViewModel
+import io.livekit.android.example.voiceassistant.data.SettingsManager
 import io.livekit.android.room.track.screencapture.ScreenCaptureParams
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -107,19 +110,30 @@ fun VoiceAssistant(
             room = viewModel.room
         )
     )
+    
+    val room = requireRoom()
+    val isConnected by room.stateFlow.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
 
     val context = LocalContext.current
+    val settingsManager = remember { SettingsManager(context) }
+    val pttMode by settingsManager.pttModeFlow.collectAsState(initial = false)
+
+    val personality by settingsManager.personalityFlow.collectAsState(initial = "Default")
 
     SessionScope(session = session) { session ->
 
         // Start the session when we have at least microphone permissions.
         // Permission removals kill the app, so this is a one-way transition.
-        LaunchedEffect(canEnableMic) {
+        LaunchedEffect(canEnableMic, personality) {
             if (!canEnableMic) {
                 return@LaunchedEffect
             }
 
+            // Set personality in metadata for the agent to read
             val result = session.start()
+            if (result.isSuccess) {
+                room.localParticipant.setMetadata(personality)
+            }
 
             // Handle if the session fails to connect.
             if (result.isFailure) {
@@ -168,6 +182,19 @@ fun VoiceAssistant(
         ) {
             val coroutineScope = rememberCoroutineScope { Dispatchers.IO }
 
+            if (!isConnected) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Red.copy(alpha = 0.7f))
+                        .padding(8.dp)
+                        .layoutId("offlineBanner"),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Offline Mode - Basic responses only", color = Color.White)
+                }
+            }
+
             ChatLog(
                 room = room,
                 messages = sessionMessages.messages,
@@ -187,6 +214,15 @@ fun VoiceAssistant(
                     message = ""
                 },
                 modifier = Modifier.layoutId(LAYOUT_ID_CHAT_BAR)
+            )
+
+            QuickActions(
+                onActionClick = { command ->
+                    coroutineScope.launch {
+                        sessionMessages.send(command)
+                    }
+                },
+                modifier = Modifier.layoutId(LAYOUT_ID_QUICK_ACTIONS)
             )
 
             // Amplitude visualization of the Assistant's voice track.
@@ -239,6 +275,10 @@ fun VoiceAssistant(
                 isChatEnabled = chatVisible,
                 onChatClick = { chatVisible = !chatVisible },
                 onExitClick = onEndCall,
+                isPttMode = pttMode,
+                onPttPress = { pressed ->
+                    requestedAudio = pressed
+                },
                 modifier = Modifier
                     .layoutId(LAYOUT_ID_CONTROL_BAR)
             )
@@ -291,22 +331,24 @@ private const val LAYOUT_ID_AGENT = "agentVisualizer"
 private const val LAYOUT_ID_CHAT_LOG = "chatLog"
 private const val LAYOUT_ID_CONTROL_BAR = "controlBar"
 private const val LAYOUT_ID_CHAT_BAR = "chatBar"
+private const val LAYOUT_ID_QUICK_ACTIONS = "quickActions"
 private const val LAYOUT_ID_CAMERA = "camera"
 private const val LAYOUT_ID_SCREENSHARE = "screenshare"
 
 private fun getConstraints(chatVisible: Boolean, cameraVisible: Boolean, screenShareVisible: Boolean) = ConstraintSet {
-    val (agentVisualizer, chatLog, controlBar, chatBar, camera, screenShare) = createRefsFor(
+    val (agentVisualizer, chatLog, controlBar, chatBar, quickActions, camera, screenShare) = createRefsFor(
         LAYOUT_ID_AGENT,
         LAYOUT_ID_CHAT_LOG,
         LAYOUT_ID_CONTROL_BAR,
         LAYOUT_ID_CHAT_BAR,
+        LAYOUT_ID_QUICK_ACTIONS,
         LAYOUT_ID_CAMERA,
         LAYOUT_ID_SCREENSHARE,
     )
     val chatTopGuideline = createGuidelineFromTop(0.2f)
 
     constrain(chatLog) {
-        top.linkTo(chatTopGuideline)
+        top.linkTo(parent.top) // Temporarily link to top, we'll adjust if banner is visible
         bottom.linkTo(chatBar.top)
         start.linkTo(parent.start)
         end.linkTo(parent.end)
@@ -315,9 +357,17 @@ private fun getConstraints(chatVisible: Boolean, cameraVisible: Boolean, screenS
     }
 
     constrain(chatBar) {
-        bottom.linkTo(controlBar.top, 16.dp)
+        bottom.linkTo(quickActions.top, 8.dp)
         start.linkTo(parent.start, 16.dp)
         end.linkTo(parent.end, 16.dp)
+        width = Dimension.fillToConstraints
+        height = Dimension.wrapContent
+    }
+
+    constrain(quickActions) {
+        bottom.linkTo(controlBar.top, 8.dp)
+        start.linkTo(parent.start)
+        end.linkTo(parent.end)
         width = Dimension.fillToConstraints
         height = Dimension.wrapContent
     }
