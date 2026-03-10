@@ -67,11 +67,9 @@ import io.livekit.android.example.voiceassistant.ui.ChatLog
 import io.livekit.android.example.voiceassistant.ui.ControlBar
 import io.livekit.android.example.voiceassistant.ui.QuickActions
 import io.livekit.android.example.voiceassistant.viewmodel.VoiceAssistantViewModel
-import io.livekit.android.events.RoomEvent
 import io.livekit.android.room.Room
 import io.livekit.android.room.track.screencapture.ScreenCaptureParams
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -117,8 +115,8 @@ fun VoiceAssistant(
     )
     
     val room = requireRoom()
-    val connectionState = rememberConnectionState()
-    val isConnected = connectionState == Room.State.CONNECTED
+    val connectionState by rememberConnectionState()
+    val isConnected = connectionState == io.livekit.android.room.Room.State.CONNECTED
 
     val context = LocalContext.current
     val settingsManager = remember { SettingsManager(context) }

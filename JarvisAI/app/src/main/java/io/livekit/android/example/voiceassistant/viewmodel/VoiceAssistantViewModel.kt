@@ -11,12 +11,11 @@ import io.livekit.android.token.cached
 import io.livekit.android.example.voiceassistant.data.ChatHistoryRepository
 import io.livekit.android.example.voiceassistant.data.JarvisDatabase
 import io.livekit.android.room.Room
-import io.livekit.android.room.track.Track
-import io.livekit.android.room.participant.Participant
 import androidx.lifecycle.viewModelScope
 import io.livekit.android.events.RoomEvent
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.*
 import java.util.UUID
 
 /**
@@ -47,18 +46,18 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
     }
 
     private fun setupMessageListener() {
-        viewModelScope.launch {
-            room.events.collect { event ->
+        room.events
+            .onEach { event ->
                 if (event is RoomEvent.ParticipantMetadataChanged) {
                     val participant = event.participant
                     repository.saveMessage(
-                        sender = if (participant != null && participant.identity != room.localParticipant.identity) "agent" else "user",
+                        sender = if (participant == room.localParticipant) "user" else "agent",
                         content = participant.metadata ?: "",
                         sessionId = sessionId
                     )
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     override fun onCleared() {
