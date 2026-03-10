@@ -3,13 +3,11 @@ package io.livekit.android.example.voiceassistant.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.livekit.android.LiveKit
 import io.livekit.android.example.voiceassistant.screen.VoiceAssistantRoute
 import io.livekit.android.token.TokenSource
 import io.livekit.android.token.cached
-import java.util.UUID
 
 /**
  * This ViewModel handles holding onto the Room object, so that it is
@@ -20,7 +18,6 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
     val room = LiveKit.create(application)
 
     val tokenSource: TokenSource
-    val sessionId = UUID.randomUUID().toString()
 
     init {
         val (sandboxId, url, token) = savedStateHandle.toRoute<VoiceAssistantRoute>()
