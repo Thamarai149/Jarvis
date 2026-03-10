@@ -115,7 +115,7 @@ fun VoiceAssistant(
     )
     
     val room = requireRoom()
-    val isConnected by room::state.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
+    val isConnected by room.state.map { it == Room.State.CONNECTED }.collectAsState(initial = false)
 
     val context = LocalContext.current
     val settingsManager = remember { SettingsManager(context) }
