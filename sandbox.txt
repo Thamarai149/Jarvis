@@ -1,0 +1,6 @@
+lk app create \
+	--sandbox jarvis2026-1y3ui7
+
+lk app create --template agent-starter-android --sandbox jarvis2026-1y3ui7 --api-key APIgLyTZCN7AZam --api-secret EfGhdSLrKoRFhI8IWVcllw7hLOcWetD9tQg2P1u7DfWA
+
+lk token create --api-key APIgLyTZCN7AZam --api-secret EfGhdSLrKoRFhI8IWVcllw7hLOcWetD9tQg2P1u7DfW --join --room test_room --identity test_user  --valid-for 24h
