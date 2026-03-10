@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -24,12 +23,6 @@ import androidx.compose.material.icons.outlined.PresentToAll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,11 +60,7 @@ fun ControlBar(
     onCameraClick: () -> Unit,
     isScreenShareEnabled: Boolean,
     onScreenShareClick: () -> Unit,
-    isChatEnabled: Boolean,
-    onChatClick: () -> Unit,
     onExitClick: () -> Unit,
-    isPttMode: Boolean = false,
-    onPttPress: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -92,27 +81,13 @@ fun ControlBar(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .then(
-                    if (isPttMode) {
-                        Modifier.pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    onPttPress(true)
-                                    tryAwaitRelease()
-                                    onPttPress(false)
-                                }
-                            )
-                        }
-                    } else {
-                        Modifier.clickable(onClick = onMicClick)
-                    }
-                )
+                .clickable(onClick = onMicClick)
                 .height(48.dp)
                 .weight(1f)
                 .enabledButtonModifier(isMicEnabled)
         ) {
             Spacer(Modifier.size(8.dp))
-            Icon(micIcon, if (isPttMode) "PTT" else "Toggle Microphone")
+            Icon(micIcon, "Toggle Microphone")
             AnimatedVisibility(isMicEnabled) {
                 AudioBarVisualizer(
                     audioTrackRef = localAudioTrack,
@@ -163,17 +138,6 @@ fun ControlBar(
         Spacer(Modifier.size(8.dp))
 
         IconButton(
-            onClick = onChatClick,
-            modifier = buttonModifier
-                .weight(1f)
-                .enabledButtonModifier(isChatEnabled)
-        ) {
-            Icon(Icons.AutoMirrored.Filled.Chat, "Toggle Chat")
-        }
-
-        Spacer(Modifier.size(8.dp))
-
-        IconButton(
             onClick = onExitClick,
             modifier = buttonModifier.weight(1f)
         ) {
@@ -193,8 +157,6 @@ fun ControlBarPreview() {
         onCameraClick = {},
         isScreenShareEnabled = false,
         onScreenShareClick = { },
-        isChatEnabled = false,
-        onChatClick = {},
         onExitClick = {},
         modifier = Modifier
             .fillMaxWidth()

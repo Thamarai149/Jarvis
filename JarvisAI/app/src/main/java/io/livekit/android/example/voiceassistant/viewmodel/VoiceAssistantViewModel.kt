@@ -3,17 +3,12 @@ package io.livekit.android.example.voiceassistant.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.livekit.android.LiveKit
 import io.livekit.android.example.voiceassistant.screen.VoiceAssistantRoute
 import io.livekit.android.token.TokenSource
 import io.livekit.android.token.cached
-import io.livekit.android.example.voiceassistant.data.ChatHistoryRepository
-import io.livekit.android.example.voiceassistant.data.JarvisDatabase
-import androidx.lifecycle.viewModelScope
-import io.livekit.android.events.RoomEvent
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.launchIn
 import java.util.UUID
 
 /**
@@ -25,7 +20,6 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
     val room = LiveKit.create(application)
 
     val tokenSource: TokenSource
-    private val repository: ChatHistoryRepository
     val sessionId = UUID.randomUUID().toString()
 
     init {
@@ -36,26 +30,6 @@ class VoiceAssistantViewModel(application: Application, savedStateHandle: SavedS
         } else {
             TokenSource.fromLiteral(url, token).cached()
         }
-
-        val database = JarvisDatabase.getDatabase(application)
-        repository = ChatHistoryRepository(database.chatHistoryDao())
-
-        setupMessageListener()
-    }
-
-    private fun setupMessageListener() {
-        room.events
-            .onEach { event: RoomEvent ->
-                if (event is RoomEvent.ParticipantMetadataChanged) {
-                    val participant = event.participant
-                    repository.saveMessage(
-                        sender = if (participant == room.localParticipant) "user" else "agent",
-                        content = participant.metadata ?: "",
-                        sessionId = sessionId
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
     }
 
     override fun onCleared() {

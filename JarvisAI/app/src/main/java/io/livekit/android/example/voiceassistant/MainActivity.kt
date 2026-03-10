@@ -14,18 +14,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import io.livekit.android.example.voiceassistant.screen.*
-import io.livekit.android.example.voiceassistant.data.SettingsManager
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import io.livekit.android.LiveKit
 import io.livekit.android.example.voiceassistant.screen.ConnectRoute
@@ -50,19 +41,12 @@ class MainActivity : ComponentActivity() {
 
             LiveKitVoiceAssistantExampleTheme(dynamicColor = false) {
                 val context = LocalContext.current
-                val settingsManager = remember { SettingsManager(context) }
-                val currentTheme by settingsManager.themeFlow.collectAsState(initial = "System")
 
                 Scaffold(
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                     topBar = {
                         CenterAlignedTopAppBar(
-                            title = { Text("JARVIS") },
-                            actions = {
-                                IconButton(onClick = { navController.navigate(SettingsRoute) }) {
-                                    Icon(Icons.Default.Settings, contentDescription = "Settings")
-                                }
-                            }
+                            title = { Text("Voice Assistant") }
                         )
                     }
                 ) { innerPadding ->
@@ -97,10 +81,6 @@ class MainActivity : ComponentActivity() {
                                         navController.navigateUp()
                                     }
                                 )
-                            }
-
-                            composable<SettingsRoute> {
-                                SettingsScreen(onBack = { navController.navigateUp() })
                             }
                         }
                     }
